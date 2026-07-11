@@ -17,9 +17,10 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     GEMINI_API_KEY: str = ""
     ANTHROPIC_API_KEY: str = ""
+    GROQ_API_KEY: str = ""
     
-    # Default LLM Provider (openai, gemini, anthropic, or offline)
-    DEFAULT_LLM_PROVIDER: str = "offline"
+    # Default LLM Provider (openai, gemini, anthropic, groq, or offline)
+    DEFAULT_LLM_PROVIDER: str = "groq"
 
     class Config:
         env_file = ".env"

@@ -8,6 +8,7 @@ interface ConfigState {
   has_openai_key: boolean;
   has_gemini_key: boolean;
   has_anthropic_key: boolean;
+  has_groq_key: boolean;
 }
 
 export const SettingsTab: React.FC = () => {
@@ -19,6 +20,7 @@ export const SettingsTab: React.FC = () => {
   const [openaiKey, setOpenaiKey] = useState('');
   const [geminiKey, setGeminiKey] = useState('');
   const [anthropicKey, setAnthropicKey] = useState('');
+  const [groqKey, setGroqKey] = useState('');
   const [provider, setProvider] = useState('gemini');
 
   const API_URL = 'http://localhost:8000/api';
@@ -52,6 +54,7 @@ export const SettingsTab: React.FC = () => {
           openai_api_key: openaiKey.trim() || undefined,
           gemini_api_key: geminiKey.trim() || undefined,
           anthropic_api_key: anthropicKey.trim() || undefined,
+          groq_api_key: groqKey.trim() || undefined,
           default_llm_provider: provider,
         }),
       });
@@ -64,6 +67,7 @@ export const SettingsTab: React.FC = () => {
         setOpenaiKey('');
         setGeminiKey('');
         setAnthropicKey('');
+        setGroqKey('');
       } else {
         setSaveStatus('error');
       }
@@ -102,6 +106,20 @@ export const SettingsTab: React.FC = () => {
               placeholder={config?.has_gemini_key ? "••••••••••••••••••••••••" : "Enter GEMINI_API_KEY"}
               value={geminiKey}
               onChange={(e) => setGeminiKey(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <div className="flex-between" style={{ marginBottom: '6px' }}>
+              <label style={{ fontSize: '0.9rem', fontWeight: 600 }}>Groq API Key</label>
+              {config?.has_groq_key && <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600 }}>✓ Key Configured</span>}
+            </div>
+            <input
+              type="password"
+              className="input-field"
+              placeholder={config?.has_groq_key ? "••••••••••••••••••••••••" : "Enter GROQ_API_KEY"}
+              value={groqKey}
+              onChange={(e) => setGroqKey(e.target.value)}
             />
           </div>
 
@@ -146,7 +164,7 @@ export const SettingsTab: React.FC = () => {
             value={provider}
             onChange={(e) => setProvider(e.target.value)}
           >
-
+            <option value="groq" disabled={config ? !config.has_groq_key && !groqKey : false}>Groq API (llama-3.3-70b-versatile)</option>
             <option value="gemini" disabled={config ? !config.has_gemini_key && !geminiKey : false}>Gemini API (gemini-2.5-flash)</option>
             <option value="openai" disabled={config ? !config.has_openai_key && !openaiKey : false}>OpenAI API (gpt-4o-mini)</option>
           </select>

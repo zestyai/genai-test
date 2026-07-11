@@ -5,6 +5,7 @@ class SettingsUpdate(BaseModel):
     openai_api_key: Optional[str] = None
     gemini_api_key: Optional[str] = None
     anthropic_api_key: Optional[str] = None
+    groq_api_key: Optional[str] = None
     default_llm_provider: Optional[str] = None
 
 class ConfigResponse(BaseModel):
@@ -14,6 +15,7 @@ class ConfigResponse(BaseModel):
     has_openai_key: bool
     has_gemini_key: bool
     has_anthropic_key: bool
+    has_groq_key: bool
 
 class QueryRequest(BaseModel):
     question: str

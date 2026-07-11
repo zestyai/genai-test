@@ -92,6 +92,7 @@ export const ChatTab: React.FC = () => {
               value={llmProvider}
               onChange={(e) => dispatch(setProvider(e.target.value))}
             >
+              <option value="groq">Groq API</option>
               <option value="gemini">Gemini API</option>
               <option value="openai">OpenAI API</option>
             </select>

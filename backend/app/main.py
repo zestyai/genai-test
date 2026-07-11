@@ -37,7 +37,8 @@ async def get_config():
         default_llm_provider=settings.DEFAULT_LLM_PROVIDER,
         has_openai_key=bool(settings.OPENAI_API_KEY),
         has_gemini_key=bool(settings.GEMINI_API_KEY),
-        has_anthropic_key=bool(settings.ANTHROPIC_API_KEY)
+        has_anthropic_key=bool(settings.ANTHROPIC_API_KEY),
+        has_groq_key=bool(settings.GROQ_API_KEY)
     )
 
 @app.post("/api/config", response_model=ConfigResponse)
@@ -51,12 +52,17 @@ async def update_config(update: SettingsUpdate):
     if update.anthropic_api_key is not None:
         settings.ANTHROPIC_API_KEY = update.anthropic_api_key
         os.environ["ANTHROPIC_API_KEY"] = update.anthropic_api_key
+    if update.groq_api_key is not None:
+        settings.GROQ_API_KEY = update.groq_api_key
+        os.environ["GROQ_API_KEY"] = update.groq_api_key
     if update.default_llm_provider is not None:
         settings.DEFAULT_LLM_PROVIDER = update.default_llm_provider
         
     # Autodetect default LLM provider if set to auto/none
     if settings.DEFAULT_LLM_PROVIDER == "offline":
-        if settings.GEMINI_API_KEY:
+        if settings.GROQ_API_KEY:
+            settings.DEFAULT_LLM_PROVIDER = "groq"
+        elif settings.GEMINI_API_KEY:
             settings.DEFAULT_LLM_PROVIDER = "gemini"
         elif settings.OPENAI_API_KEY:
             settings.DEFAULT_LLM_PROVIDER = "openai"
@@ -68,7 +74,8 @@ async def update_config(update: SettingsUpdate):
         default_llm_provider=settings.DEFAULT_LLM_PROVIDER,
         has_openai_key=bool(settings.OPENAI_API_KEY),
         has_gemini_key=bool(settings.GEMINI_API_KEY),
-        has_anthropic_key=bool(settings.ANTHROPIC_API_KEY)
+        has_anthropic_key=bool(settings.ANTHROPIC_API_KEY),
+        has_groq_key=bool(settings.GROQ_API_KEY)
     )
 
 @app.get("/api/documents")

@@ -12,6 +12,7 @@ interface ConfigState {
   has_openai_key: boolean;
   has_gemini_key: boolean;
   has_anthropic_key: boolean;
+  has_groq_key: boolean;
 }
 
 export const App: React.FC = () => {

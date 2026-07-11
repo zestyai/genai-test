@@ -50,6 +50,40 @@ def run_llm_completion(prompt: str, system_instruction: str = "", provider: str 
     """
     provider = provider or settings.DEFAULT_LLM_PROVIDER
     
+    # Check if Groq is available
+    if (provider == "groq" or (not provider and settings.GROQ_API_KEY)) and settings.GROQ_API_KEY:
+        try:
+            from openai import OpenAI
+            client = OpenAI(
+                api_key=settings.GROQ_API_KEY,
+                base_url="https://api.groq.com/openai/v1"
+            )
+            messages = []
+            if system_instruction:
+                messages.append({"role": "system", "content": system_instruction})
+            messages.append({"role": "user", "content": prompt})
+            
+            models_to_try = [
+                "llama-3.3-70b-versatile",
+                "llama-3.1-70b-versatile",
+                "llama3-70b-8192",
+                "mixtral-8x7b-32768"
+            ]
+            for model_name in models_to_try:
+                try:
+                    response = client.chat.completions.create(
+                        model=model_name,
+                        messages=messages,
+                        temperature=0.1
+                    )
+                    return response.choices[0].message.content, "groq"
+                except Exception as ex:
+                    print(f"Groq model {model_name} failed: {ex}. Trying next fallback...")
+                    
+            raise Exception("All Groq models failed.")
+        except Exception as e:
+            print(f"Groq generation failed: {e}. Trying fallbacks.")
+
     # Check if Gemini API is available and selected
     if (provider == "gemini" or (not provider and settings.GEMINI_API_KEY)) and settings.GEMINI_API_KEY:
         try:
