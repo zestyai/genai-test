@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+ENV/
+.env
+
+# Databases & Vector Stores
+backend/chroma_db/
+backend/index_critical.py
+
+# Node/React
+node_modules/
+dist/
+build/
+.eslintcache
+
+# OS Files
+.DS_Store
+Thumbs.db
