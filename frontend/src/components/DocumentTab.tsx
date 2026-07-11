@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
 import { fetchDocuments, indexDocument } from '../store/documentSlice';
@@ -7,6 +7,8 @@ import { Files, Database, CheckCircle2, AlertCircle } from 'lucide-react';
 export const DocumentTab: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { items, loading, error, activeFolder } = useSelector((state: RootState) => state.documents);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchDocuments(activeFolder));
@@ -14,6 +16,41 @@ export const DocumentTab: React.FC = () => {
 
   const handleIndex = (filename: string) => {
     dispatch(indexDocument({ filename, folder: activeFolder }));
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    if (file.type !== 'application/pdf') {
+      setUploadError('Only PDF files are supported.');
+      return;
+    }
+    
+    setUploading(true);
+    setUploadError(null);
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      const response = await fetch(`http://localhost:8000/api/documents/upload?folder=${activeFolder}`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        dispatch(fetchDocuments(activeFolder));
+      } else {
+        const data = await response.json();
+        setUploadError(data.detail || 'Failed to upload document.');
+      }
+    } catch (err) {
+      setUploadError('Network error uploading document.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -27,6 +64,33 @@ export const DocumentTab: React.FC = () => {
           Refresh Files
         </button>
       </div>
+
+      {/* Upload area */}
+      <div className="glass-panel" style={{ borderStyle: 'dashed', borderWidth: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 20px', textAlign: 'center', cursor: 'pointer', position: 'relative' }}>
+        <input 
+          type="file" 
+          accept=".pdf" 
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} 
+          onChange={handleFileUpload}
+          disabled={uploading}
+        />
+        <Files style={{ color: 'var(--text-muted)', marginBottom: '8px' }} size={28} />
+        {uploading ? (
+          <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Uploading your PDF manual...</span>
+        ) : (
+          <div>
+            <span style={{ fontSize: '0.9rem', fontWeight: 600, display: 'block', marginBottom: '2px' }}>Drag & drop or click to upload PDF</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Upload insurance rate pages or rules manually (max 20MB)</span>
+          </div>
+        )}
+      </div>
+
+      {uploadError && (
+        <div className="glass-panel" style={{ borderColor: 'var(--accent-rose)', display: 'flex', gap: '12px', alignItems: 'center', padding: '12px 16px' }}>
+          <AlertCircle style={{ color: 'var(--accent-rose)' }} size={16} />
+          <span style={{ fontSize: '0.85rem', color: 'var(--accent-rose)' }}>{uploadError}</span>
+        </div>
+      )}
 
       {error && (
         <div className="glass-panel" style={{ borderColor: 'var(--accent-rose)', display: 'flex', gap: '12px', alignItems: 'center' }}>

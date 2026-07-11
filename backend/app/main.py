@@ -127,6 +127,34 @@ async def list_documents(folder: str = "artifacts/1"):
             
     return files
 
+@app.post("/api/documents/upload")
+async def upload_document(file: UploadFile = File(...), folder: str = "artifacts/1"):
+    import shutil
+    try:
+        filename = os.path.basename(file.filename)
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        dest_dir = os.path.join(project_root, "artifacts", "1")
+        os.makedirs(dest_dir, exist_ok=True)
+        dest_path = os.path.join(dest_dir, filename)
+        
+        with open(dest_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        size_mb = os.path.getsize(dest_path) / (1024 * 1024)
+        
+        try:
+            await db.documents.update_one(
+                {"name": filename, "folder": folder},
+                {"$set": {"is_indexed": False, "size_mb": round(size_mb, 2)}},
+                upsert=True
+            )
+        except Exception:
+            pass
+            
+        return {"status": "success", "filename": filename, "size_mb": round(size_mb, 2)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload document: {str(e)}")
+
 @app.post("/api/documents/index")
 async def index_document(filename: str, folder: str = "artifacts/1"):
     """
