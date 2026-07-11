@@ -156,14 +156,13 @@ def query_rag_pipeline(question: str, folder_path: str, variation: str = "advanc
     system_instruction = (
         "You are an insurance actuarial assistant. Your job is to answer questions about homeowner rate plans and rule manuals. "
         "Strictly answer the question based on the provided context sources. "
-        "Provide only the direct answer as requested. For lists of rules, return a clean bullet point list of rules. "
-        "For premium calculations, return only the final rounded premium amount (e.g. '$604'), with no explanations or steps."
+        "If the question involves calculations, detail each step of the calculation (Base Rate, Deductible percentage, Deductible factor, and final multiplication) and round the final answer to the nearest integer."
     )
     
     prompt = (
         f"Context:\n{context_str}\n\n"
         f"Question: {question}\n\n"
-        f"Answer the question using the context. Return only the final clean answer without any calculation steps or introduction."
+        f"Answer the question using the context. If you need to perform calculations, show your steps."
     )
     
     # Try LLM completion
